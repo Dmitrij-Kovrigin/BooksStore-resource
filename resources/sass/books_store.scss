@@ -1,0 +1,149 @@
+.index-list {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px 0;
+    border-bottom: 1px solid #dddddd;
+
+    &__buttons {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    &__extra {
+        img {
+            height: 150px;
+            width: auto;
+        }
+    }
+}
+
+.show-content {
+    &__block {
+        padding: 20px;
+
+        span {
+            font-size: 18px;
+            font-style: italic;
+            color: gray;
+        }
+    }
+
+    .images {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+
+        img {
+            height: 200px;
+            width: auto;
+            margin: 7px;
+            display: block;
+        }
+
+
+    }
+
+    &__buttons {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+}
+
+textarea {
+    height: 200px !important;
+}
+
+.book-photo-form {
+    span {
+        button {
+            margin-top: 6px;
+            margin-right: 5px;
+        }
+
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+}
+
+.background {
+    background: rgb(223, 248, 228);
+}
+
+.background2 {
+    background: rgb(179, 243, 191);
+}
+
+#confirm-modal {
+    min-width: 100vw;
+    min-height: 100vh;
+    box-sizing: border-box;
+    top: 0;
+    left: 0;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .buttons {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+}
+
+.body-modal {
+    overflow: hidden;
+}
+
+.card-header {
+    &__wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        // &__sort {}
+    }
+}
+
+.enter-image {
+    img {
+        height: 150px;
+        width: auto;
+    }
+
+}
+
+.tags-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+
+    input {
+        display: none;
+    }
+
+    &__tag {
+        label {
+            // background-color: gray;
+            border: 1px solid lightseagreen;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        input:checked+label {
+            background-color: rgb(35, 245, 119);
+        }
+    }
+
+}

@@ -1,0 +1,281 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Author;
+use App\Models\Book;
+use App\Models\BookPhoto;
+use App\Models\Tag;
+use App\Models\TagBook;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Barryvdh\DomPDF\Facade as PDF;
+
+class BookController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+
+
+        $authors = Author::orderBy('name')->get();
+
+        if ($request->author) {
+            $books = Book::where('author_id', $request->author)->get();
+        } elseif ($request->s) {
+            $books = Book::where('title', 'like', '%' . $request->s . '%')->get();
+        } else {
+            $books = Book::orderBy('updated_at', 'desc')->get();
+        }
+
+
+        // $books = Book::where('pages', '>', 12)->get()->sortByDesc('title');
+
+        // $plucked = $books->pluck('title');
+        // dd($plucked);
+        // $books = $books->nth(2); // kas antra knyga
+        // dd($books->contains(fn ($val) => $val->pages == 98));
+        return view('book.index', [
+            'books' => $books,
+            'authors' => $authors,
+            'author_id' => $request->author ?? 0,
+            's' => $request->s ?? ''
+
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        $authors = Author::all();
+        $tags = Tag::orderBy('name')->get();
+        return view('book.create', [
+            'authors' => $authors,
+            'tags' => $tags
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'book_title' => 'required|max:255|min:2',
+            'book_isbn' => 'required|max:20|min:13',
+            'book_pages' => 'required|integer|max:200|min:1',
+            'book_about' => 'required|min:10|',
+            'author_id' => 'required|integer|min:1'
+        ], [
+            'author_id.min' => 'Please, select author!'
+        ]);
+
+        $request->flash();
+
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator);
+        }
+
+
+        $book = new Book;
+        $book->title = $request->book_title;
+        $book->isbn = $request->book_isbn;
+        $book->pages = $request->book_pages;
+        $book->about = $request->book_about;
+        $book->author_id = $request->author_id;
+
+        $book->save();
+
+        // Starts Tag Manager
+
+        foreach ($request->tag ?? [] as $tagId) {
+            $tagBook = new TagBook;
+            $tagBook->tag_id = $tagId;
+            $tagBook->book_id = $book->id;
+            $tagBook->save();
+        }
+
+        // End Tag Manager
+
+
+        if ($request->file('book_photo')) {
+            foreach ($request->file('book_photo') as $photo) {
+                $bookPhoto = new BookPhoto;
+                $bookPhoto->handleImage($photo);
+                $bookPhoto->book_id = $book->id;
+                $bookPhoto->save();
+            }
+        }
+
+        return redirect()->route('book_index')->with('success_message', 'New book was created.');
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Book  $book
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Book $book)
+    {
+        return view('book.show', ['book' => $book]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Book  $book
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Book $book)
+    {
+        $authors = Author::all();
+        $tags = Tag::orderBy('name')->get();
+
+        $bookTags = $book->getTagBooks->pluck('tag_id')->all(); // pluck istraukia reikiama reiksme is koleckcijos, all pavercia i masyva(vel)
+
+        return view('book.edit', [
+            'book' => $book,
+            'authors' => $authors,
+            'tags' => $tags,
+            'bookTags' => $bookTags
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Book  $book
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Book $book)
+    {
+        $validator = Validator::make($request->all(), [
+            'book_title' => 'required|max:255|min:2',
+            'book_isbn' => 'required|max:20|min:13',
+            'book_pages' => 'required|integer|max:200|min:1',
+            'book_about' => 'required|min:10|',
+            'author_id' => 'required|integer|min:1'
+        ], [
+            'author_id.min' => 'Please, select author!'
+        ]);
+
+        $request->flash();
+
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator);
+        }
+
+        $book->title = $request->book_title;
+        $book->isbn = $request->book_isbn;
+        $book->pages = $request->book_pages;
+        $book->about = $request->book_about;
+        $book->author_id = $request->author_id;
+
+        $book->save();
+
+        // Starts Tag Manager
+
+        $oldBookTags = $book->getTagBooks->pluck('tag_id')->all();
+        $bookTags = array_map(fn ($t) => (int) $t, ($request->tag ?? []));
+        $delBookTags = array_diff($oldBookTags, $bookTags);
+
+
+        foreach ($delBookTags as $tagId) {
+            $tagBook = TagBook::where('tag_id', $tagId);
+            $tagBook->delete();
+        }
+
+        foreach ($request->tag ?? [] as $tagId) {
+
+            $tagBook = TagBook::where('tag_id', $tagId)->where('book_id', $book->id)->first();
+            if ($tagBook) {
+                continue;
+            }
+            $tagBook = new TagBook;
+            $tagBook->tag_id = $tagId;
+            $tagBook->book_id = $book->id;
+            $tagBook->save();
+        }
+
+
+
+        // End Tag Manager
+
+
+        foreach ($request->delete_photo ?? [] as $photoId) {
+            $bookPhoto = BookPhoto::where('id', $photoId)->first();
+            $bookPhoto->deleteOldImage();
+            $bookPhoto->delete();
+        }
+
+        if ($request->file('book_photo')) {
+            foreach ($request->file('book_photo') as $photo) {
+                $bookPhoto = new BookPhoto;
+                $bookPhoto->handleImage($photo);
+                $bookPhoto->book_id = $book->id;
+                $bookPhoto->save();
+            }
+        }
+
+        /// Set Main photo
+
+        $mainId = (int) $request->main_photo ?? 0;
+
+        foreach (BookPhoto::where('book_id', $book->id)->get() as $photo) {
+            if ($photo->id == $mainId) {
+                $photo->main = 1;
+            } else {
+                $photo->main = null;
+            }
+            $photo->save();
+        }
+
+
+
+        return redirect()->route('book_index')->with('success_message', 'Book was addited.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Book  $book
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request, Book $book)
+    {
+
+        foreach ($book->getPhotos as $bookPhoto) {
+            $bookPhoto->deleteOldImage();
+            $bookPhoto->delete();
+        }
+        $book->delete();
+
+        if ($request->return && $request->return == 'back') {
+            return redirect()->back()->with('success_message', 'The book was deleted.');
+        }
+        return redirect()->route('book_index')->with('success_message', 'The book was deleted.');
+    }
+
+    public function pdf(Book $book)
+    {
+        $pdf = PDF::loadView('book.pdf', ['book' => $book]);
+        return $pdf->download('book-' . $book->id . '.pdf');
+    }
+}

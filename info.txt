@@ -1,0 +1,16 @@
+Red dragon icon
+
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<i class="fas fa-dragon" style="font-size:48px;color:red;"></i>
+
+
+Paysera:
+
+225258
+
+99b6d656b854c3f8dbda5d04e8ad091b
+
+
+Isjungt kompa:
+shutdown -s -t 2000
