@@ -1,3 +1,5 @@
+const { default: axios } = require('axios');
+
 require('./bootstrap');
 
 // Delete confirmation
@@ -75,4 +77,47 @@ window.addEventListener('DOMContentLoaded', () => {
     })
 }
 
+});
+
+
+// AUthors List
+
+window.addEventListener('DOMContentLoaded', () => {
+
+if (document.querySelector('#sort-select')) {
+    const url = document.querySelector('#authors--list').dataset.url;
+document.querySelector('#sort-select').addEventListener('change',e => {
+document.querySelector('#authors--list').innerHTML = "<div class='loader'></div>";
+    let sort;
+    switch(e.target.value) {
+        case 'name_asc': sort = '?sort=name_asc';
+        break;
+        case 'name_desc': sort = '?sort=name_desc';
+        break;
+        case 'new_asc': sort = '?sort=new_asc';
+        break;
+        case 'new_desc': sort = '?sort=new_desc';
+        break;
+        default: sort = '';
+
+    }
+ axios.get(url + sort)
+    .then(response => {
+    document.querySelector('#authors--list').innerHTML = response.data.html;
+    })
+})
+
+}
+
+
+    if (document.querySelector('#authors--list')) {
+    const url = document.querySelector('#authors--list').dataset.url;
+    axios.get(url+'?sort=name_desc')
+    .then(response => {
+    document.querySelector('#authors--list').innerHTML = response.data.html;
+    })
+
+
+
+        }
 });

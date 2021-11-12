@@ -64,6 +64,8 @@ Route::prefix('authors')->name('author_')->group(function () {
     Route::put('/update/{author}', [AuthorController::class, 'update'])->name('update');
     Route::delete('/delete/{author}', [AuthorController::class, 'destroy'])->name('delete');
     Route::get('/show/{author}', [AuthorController::class, 'show'])->name('show');
+
+    Route::get('/list', [AuthorController::class, 'list'])->name('list');
 });
 
 Route::prefix('brands')->name('brand_')->group(function () {
@@ -74,15 +76,17 @@ Route::prefix('brands')->name('brand_')->group(function () {
     Route::put('/update/{brand}', [BrandController::class, 'update'])->name('update');
     Route::delete('/delete/{brand}', [BrandController::class, 'destroy'])->name('delete');
     Route::get('/show/{brand}', [BrandController::class, 'show'])->name('show');
+
+    Route::get('/list', [BrandController::class, 'list'])->name('list');
 });
 
 
 
 Route::get('/outfits/create', [OutfitController::class, 'create'])->name('outfit_create');
-Route::post('/outfits/store', [OutfitController::class, 'store'])->name('outfit_store');
+Route::post('/outfits/store', [OutfitController::class, 'store'])->name('outfit_store')->middleware('replace');
 Route::get('/outfits', [OutfitController::class, 'index'])->name('outfit_index');
 Route::get('/outfits/edit/{outfit}', [OutfitController::class, 'edit'])->name('outfit_edit');
-Route::put('/outfits/update/{outfit}', [OutfitController::class, 'update'])->name('outfit_update');
+Route::put('/outfits/update/{outfit}', [OutfitController::class, 'update'])->name('outfit_update')->middleware('replace');
 Route::delete('/outfits/delete/{outfit}', [OutfitController::class, 'destroy'])->name('outfit_delete');
 Route::get('/outfits/show/{outfit}', [OutfitController::class, 'show'])->name('outfit_show');
 Route::get('/outfits/pdf/{outfit}', [OutfitController::class, 'pdf'])->name('outfit_pdf');

@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade as PDF;
 
 class BookController extends Controller
 {
+    const PAGES = 5;
     /**
      * Display a listing of the resource.
      *
@@ -20,31 +21,27 @@ class BookController extends Controller
      */
     public function index(Request $request)
     {
-
-
         $authors = Author::orderBy('name')->get();
 
         if ($request->author) {
-            $books = Book::where('author_id', $request->author)->get();
+            $books = Book::where('author_id', $request->author)
+                ->paginate(self::PAGES)
+                ->withQueryString();
         } elseif ($request->s) {
-            $books = Book::where('title', 'like', '%' . $request->s . '%')->get();
+            $books = Book::where('title', 'like', '%' . $request->s . '%')
+                ->paginate(self::PAGES)
+                ->withQueryString();
         } else {
-            $books = Book::orderBy('updated_at', 'desc')->get();
+            $books = Book::orderBy('updated_at', 'desc')
+                ->paginate(self::PAGES)
+                ->withQueryString();
         }
 
-
-        // $books = Book::where('pages', '>', 12)->get()->sortByDesc('title');
-
-        // $plucked = $books->pluck('title');
-        // dd($plucked);
-        // $books = $books->nth(2); // kas antra knyga
-        // dd($books->contains(fn ($val) => $val->pages == 98));
         return view('book.index', [
             'books' => $books,
             'authors' => $authors,
             'author_id' => $request->author ?? 0,
             's' => $request->s ?? ''
-
         ]);
     }
 

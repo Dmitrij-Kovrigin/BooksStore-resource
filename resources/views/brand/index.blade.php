@@ -22,63 +22,32 @@
 
                             <div class="form-group">
                                 <form action="{{route('brand_index')}}" method="GET">
-                                    <select name="sort" class="form-control">
+                                    <select name="sort" class="form-control" id="sort-select">
                                         <option value="">Sort by</option>
 
-                                        <option value="name_asc" @if('name_asc'==$sort) selected @endif>Name A->Z</option>
+                                        <option value="name_asc">Name A->Z</option>
 
-                                        <option value="name_desc" @if('name_desc'==$sort) selected @endif>Name Z->A</option>
+                                        <option value="name_desc">Name Z->A</option>
 
 
-                                        <option value="new_asc" @if('new_asc'==$sort) selected @endif>New A->Z</option>
+                                        <option value="new_asc">New A->Z</option>
 
-                                        <option value="new_desc" @if('new_desc'==$sort) selected @endif>New Z->A</option>
+                                        <option value="new_desc">New Z->A</option>
 
 
                                     </select>
-                                    <button type="submit" class="btn btn-success">SORT</button>
-                                    <a href="{{route('brand_index')}}" class="btn btn-secondary m-2">Reset</a>
+                                    {{-- <button type="submit" class="btn btn-success">SORT</button>
+                                    <a href="{{route('brand_index')}}" class="btn btn-secondary m-2">Reset</a> --}}
 
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <div class="container">
-                        @foreach ($brands->chunk(3) as $chunk)
-                        <div class="row justify-content-center">
-                            @foreach ($chunk as $brand)
-                            <div class="col-12">
-                                <div class="index-list">
-                                    <div class="index-list__extra">
-                                        @if ($brand->logo)
-                                        <img style="border-radius: 50%;" src="{{$brand->logo}}">
-                                        @else
-                                        <img src="{{asset('img/noimage.png')}}">
-                                        @endif
-                                    </div>
-                                    <div class="index-list__extra">
-                                        {{$brand->title}}
-                                    </div>
-                                    <div class="index-list__content">
-                                        <ul class="list-group">
-                                            <li class="list-group-item">
-                                                <b>Outfits count:</b> {{$brand->getOutfits->count()}}
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="index-list__buttons">
-                                        <a href="{{route('brand_edit', $brand)}}" class="btn btn-success m-2">EDIT</a>
-                                        <button type="submit" class="delete--button btn btn-danger m-2" @if($brand->getOutfits->count()) disabled @endif data-action="{{route('brand_delete', $brand)}}">DELETE</button>
-                                        <a href="{{route('brand_show', $brand)}}" class="btn btn-info m-2">MORE</a>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-                        @endforeach
-                    </div>
+                <div class="card-body" id="authors--list" data-url="{{route('brand_list')}}">
+
+                    <div class="loader">Loading...</div>
+
                 </div>
             </div>
         </div>

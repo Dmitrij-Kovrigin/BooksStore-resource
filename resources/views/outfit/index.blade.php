@@ -94,6 +94,8 @@
 
                         @endforelse
                     </div>
+                    {{$outfits->links()}}
+
                 </div>
             </div>
         </div>

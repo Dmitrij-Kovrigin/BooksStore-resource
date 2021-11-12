@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Author;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
+use Response;
 use Illuminate\Support\Facades\Validator;
+use View;
+
+
 // use Illuminate\Support\Facades\Request;
 
 class AuthorController extends Controller
@@ -25,6 +30,8 @@ class AuthorController extends Controller
 
         // Collection PHP sortBy(a), sortByDesc(a)
         // MariaDB DB orderBy(a), orderBy(a, 'desc')
+
+
 
 
         if ($request->sort) {
@@ -52,6 +59,33 @@ class AuthorController extends Controller
         // $books = $books->nth(2); // kas antra knyga
         // dd($books->contains(fn ($val) => $val->pages == 98));
         return view('author.index', ['authors' => $authors, 'sort' => $request->sort ?? '']);
+    }
+
+    public function list(Request $request)
+    {
+        sleep(2);
+
+        if ($request->sort) {
+            if ($request->sort == 'name_asc') {
+                $authors = Author::orderBy('name')->get();
+            } elseif ($request->sort == 'name_desc') {
+                $authors = Author::orderBy('name', 'desc')->get();
+            } elseif ($request->sort == 'new_asc') {
+                $authors = Author::orderBy('created_at', 'desc')->get();
+            } elseif ($request->sort == 'new_desc') {
+                $authors = Author::orderBy('created_at')->get();
+            } else {
+                $authors = Author::all(); // invalid sort input
+            }
+        } else {
+            $authors = Author::all(); // without sort
+        }
+        $html = View::make('author.list')->with('authors', $authors)->render();
+        return Response::json([
+            'html' => $html,
+            'status' => 'OK'
+        ]);
+        // return 'Hello';
     }
 
     /**

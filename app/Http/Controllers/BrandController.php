@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use View;
+use Response;
 
 class BrandController extends Controller
 {
@@ -35,6 +37,33 @@ class BrandController extends Controller
 
 
         return view('brand.index', ['brands' => $brands, 'sort' => $request->sort ?? '']);
+    }
+
+    public function list(Request $request)
+    {
+        sleep(2);
+        if ($request->sort) {
+            if ($request->sort == 'name_asc') {
+                $brands = Brand::orderBy('title')->get();
+            } elseif ($request->sort == 'name_desc') {
+                $brands = Brand::orderBy('title', 'desc')->get();
+            } elseif ($request->sort == 'new_asc') {
+                $brands = Brand::orderBy('created_at', 'desc')->get();
+            } elseif ($request->sort == 'new_desc') {
+                $brands = Brand::orderBy('created_at')->get();
+            } else {
+                $brands = Brand::all(); // invalid sort input
+            }
+        } else {
+            $brands = Brand::all(); // without sort
+        }
+        // $brands = Brand::all();
+        $html = View::make('brand.list')->with('brands', $brands)->render();
+        return Response::json([
+            'html' => $html,
+            'status' => 'OK'
+        ]);
+        // return 'Hello';
     }
 
     /**

@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade as PDF;
 
 class OutfitController extends Controller
 {
+    const PAGES = 5;
     /**
      * Display a listing of the resource.
      *
@@ -26,11 +27,17 @@ class OutfitController extends Controller
         $brands = Brand::orderBy('title')->get();
 
         if ($request->brand) {
-            $outfits = Outfit::where('brand_id', $request->brand)->get();
+            $outfits = Outfit::where('brand_id', $request->brand)
+                ->paginate(self::PAGES)
+                ->withQueryString();
         } elseif ($request->s) {
-            $outfits = Outfit::where('type', 'like', '%' . $request->s . '%')->get();
+            $outfits = Outfit::where('type', 'like', '%' . $request->s . '%')
+                ->paginate(self::PAGES)
+                ->withQueryString();
         } else {
-            $outfits = Outfit::orderBy('updated_at', 'desc')->get();
+            $outfits = Outfit::orderBy('updated_at', 'desc')
+                ->paginate(self::PAGES)
+                ->withQueryString();
         }
 
         return view('outfit.index', [
@@ -63,6 +70,8 @@ class OutfitController extends Controller
      */
     public function store(Request $request)
     {
+        $request->merge(['outfit_price' => $request->outfit_price, 'outfit_discount' => $request->outfit_discount]);
+
         $validator = Validator::make($request->all(), [
             'outfit_type' => 'required|max:255|min:2',
             'outfit_color' => 'required|max:20|min:2',
@@ -152,6 +161,9 @@ class OutfitController extends Controller
      */
     public function update(Request $request, Outfit $outfit)
     {
+
+        $request->merge(['outfit_price' => $request->outfit_price, 'outfit_discount' => $request->outfit_discount]);
+
         $validator = Validator::make($request->all(), [
             'outfit_type' => 'required|max:255|min:2',
             'outfit_color' => 'required|max:20|min:2',
