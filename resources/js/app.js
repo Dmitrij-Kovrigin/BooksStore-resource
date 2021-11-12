@@ -15,11 +15,16 @@ window.addEventListener('DOMContentLoaded', () => {
                 modal.style.display = 'none';
             })
     }
+    handleDeleteButtons();
+});
 
+
+// Handlers
+const handleDeleteButtons = () => {
     document.querySelectorAll('.delete--button').forEach(b => {
         b.addEventListener('click', () => {
-            console.log('click');
             const modal = document.querySelector('#confirm-modal');
+            const body = document.querySelector('body');
             modal.style.display = 'flex';
             modal.style.top = window.scrollY + 'px';
             body.style.overflow = 'hidden';
@@ -27,8 +32,17 @@ window.addEventListener('DOMContentLoaded', () => {
             form.setAttribute('action', b.dataset.action);
         })
     });
+}
 
-});
+const pageSelector = () => {
+    document.querySelector('#authors--pages')
+        .querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                getAuthorsList();
+            })
+        })
+}
 
 // Manage photos
 
@@ -80,44 +94,70 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
-// AUthors List
-
+// Authors List
 window.addEventListener('DOMContentLoaded', () => {
 
-if (document.querySelector('#sort-select')) {
-    const url = document.querySelector('#authors--list').dataset.url;
-document.querySelector('#sort-select').addEventListener('change',e => {
-document.querySelector('#authors--list').innerHTML = "<div class='loader'></div>";
-    let sort;
-    switch(e.target.value) {
-        case 'name_asc': sort = '?sort=name_asc';
-        break;
-        case 'name_desc': sort = '?sort=name_desc';
-        break;
-        case 'new_asc': sort = '?sort=new_asc';
-        break;
-        case 'new_desc': sort = '?sort=new_desc';
-        break;
-        default: sort = '';
-
+    // Sort Selector
+    if (document.querySelector('#sort-select')) {
+        document.querySelector('#sort-select').addEventListener('change', e => {
+            document.querySelector('#authors--list').innerHTML = '<div class="loader"></div>';
+            let sort;
+            switch (e.target.value) {
+                case 'name_asc':
+                    sort = '?sort=name_asc';
+                    break;
+                case 'name_desc':
+                    sort = '?sort=name_desc';
+                    break;
+                case 'new_asc':
+                    sort = '?sort=new_asc';
+                    break;
+                case 'new_desc':
+                    sort = '?sort=new_desc';
+                    break;
+                default:
+                    sort = '';
+            }
+            getAuthorsList(sort);
+        })
     }
- axios.get(url + sort)
-    .then(response => {
-    document.querySelector('#authors--list').innerHTML = response.data.html;
-    })
-})
 
-}
+    // Page Selector
+    const pageSelector = () => {
+        document.querySelector('#authors--pages')
+            .querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', e => {
+                    e.preventDefault();
+                    console.log(a.getAttribute('href'))
+                    getAuthorsList(a.getAttribute('href'));
+                })
+            })
+    }
 
+    const getAuthorsList = (query = '') => {
+        const url = document.querySelector('#authors--list').dataset.url;
+        axios.get(url + query)
+            .then(response => {
+                document.querySelector('#authors--list').innerHTML = response.data.html;
+                pageSelector();
+                handleDeleteButtons();
+            })
+    }
 
-    if (document.querySelector('#authors--list')) {
-    const url = document.querySelector('#authors--list').dataset.url;
-    axios.get(url+'?sort=name_desc')
-    .then(response => {
-    document.querySelector('#authors--list').innerHTML = response.data.html;
-    })
+    // Handlers
+    const handleDeleteButtons = () => {
+        document.querySelectorAll('.delete--button').forEach(b => {
+            b.addEventListener('click', () => {
+                const modal = document.querySelector('#confirm-modal');
+                const body = document.querySelector('body');
+                modal.style.display = 'flex';
+                modal.style.top = window.scrollY + 'px';
+                body.style.overflow = 'hidden';
+                const form = modal.querySelector('form');
+                form.setAttribute('action', b.dataset.action);
+            })
+        });
+    }
 
-
-
-        }
+    getAuthorsList();
 });

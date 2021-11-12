@@ -10,6 +10,7 @@ use Response;
 
 class BrandController extends Controller
 {
+    const PAGES = 4;
     /**
      * Display a listing of the resource.
      *
@@ -41,23 +42,28 @@ class BrandController extends Controller
 
     public function list(Request $request)
     {
-        sleep(2);
         if ($request->sort) {
             if ($request->sort == 'name_asc') {
-                $brands = Brand::orderBy('title')->get();
+                $brands = Brand::orderBy('title')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'name_desc') {
-                $brands = Brand::orderBy('title', 'desc')->get();
+                $brands = Brand::orderBy('title', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'new_asc') {
-                $brands = Brand::orderBy('created_at', 'desc')->get();
+                $brands = Brand::orderBy('created_at', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'new_desc') {
-                $brands = Brand::orderBy('created_at')->get();
+                $brands = Brand::orderBy('created_at')->paginate(self::PAGES)
+                    ->withQueryString();
             } else {
-                $brands = Brand::all(); // invalid sort input
+                $brands = Brand::paginate(self::PAGES)
+                    ->withQueryString(); // invalid sort input
             }
         } else {
-            $brands = Brand::all(); // without sort
+            $brands = Brand::paginate(self::PAGES)
+                ->withQueryString(); // without sort
         }
-        // $brands = Brand::all();
+        $brands->withPath('');
         $html = View::make('brand.list')->with('brands', $brands)->render();
         return Response::json([
             'html' => $html,

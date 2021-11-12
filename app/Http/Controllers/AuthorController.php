@@ -15,6 +15,7 @@ use View;
 class AuthorController extends Controller
 {
 
+    const PAGES = 4;
     public function __construct()
     {
         $this->middleware('auth');
@@ -36,13 +37,17 @@ class AuthorController extends Controller
 
         if ($request->sort) {
             if ($request->sort == 'name_asc') {
-                $authors = Author::orderBy('name')->get();
+                $authors = Author::orderBy('name')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'name_desc') {
-                $authors = Author::orderBy('name', 'desc')->get();
+                $authors = Author::orderBy('name', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'new_asc') {
-                $authors = Author::orderBy('created_at', 'desc')->get();
+                $authors = Author::orderBy('created_at', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'new_desc') {
-                $authors = Author::orderBy('created_at')->get();
+                $authors = Author::orderBy('created_at')->paginate(self::PAGES)
+                    ->withQueryString();
             } else {
                 $authors = Author::all(); // invalid sort input
             }
@@ -63,24 +68,68 @@ class AuthorController extends Controller
 
     public function list(Request $request)
     {
-        sleep(2);
+
 
         if ($request->sort) {
             if ($request->sort == 'name_asc') {
-                $authors = Author::orderBy('name')->get();
+                $authors = Author::orderBy('name')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'name_desc') {
-                $authors = Author::orderBy('name', 'desc')->get();
+                $authors = Author::orderBy('name', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'new_asc') {
-                $authors = Author::orderBy('created_at', 'desc')->get();
+                $authors = Author::orderBy('created_at', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
             } elseif ($request->sort == 'new_desc') {
-                $authors = Author::orderBy('created_at')->get();
+                $authors = Author::orderBy('created_at')->paginate(self::PAGES)
+                    ->withQueryString();
             } else {
-                $authors = Author::all(); // invalid sort input
+                $authors = Author::paginate(self::PAGES)
+                    ->withQueryString(); // invalid sort input
             }
         } else {
-            $authors = Author::all(); // without sort
+            $authors = Author::paginate(self::PAGES)
+                ->withQueryString(); // without sort
         }
+
+        $authors->withPath('');
         $html = View::make('author.list')->with('authors', $authors)->render();
+        return Response::json([
+            'html' => $html,
+            'status' => 'OK'
+        ]);
+        // return 'Hello';
+    }
+
+
+    public function pages(Request $request)
+    {
+
+
+        if ($request->sort) {
+            if ($request->sort == 'name_asc') {
+                $authors = Author::orderBy('name')->paginate(self::PAGES)
+                    ->withQueryString();
+            } elseif ($request->sort == 'name_desc') {
+                $authors = Author::orderBy('name', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
+            } elseif ($request->sort == 'new_asc') {
+                $authors = Author::orderBy('created_at', 'desc')->paginate(self::PAGES)
+                    ->withQueryString();
+            } elseif ($request->sort == 'new_desc') {
+                $authors = Author::orderBy('created_at')->paginate(self::PAGES)
+                    ->withQueryString();
+            } else {
+                $authors = Author::paginate(self::PAGES)
+                    ->withQueryString(); // invalid sort input
+            }
+        } else {
+            $authors = Author::paginate(self::PAGES)
+                ->withQueryString(); // without sort
+        }
+
+        $authors->withPath('');
+        $html = View::make('author.pages')->with('authors', $authors)->render();
         return Response::json([
             'html' => $html,
             'status' => 'OK'

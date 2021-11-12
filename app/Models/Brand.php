@@ -44,6 +44,9 @@ class Brand extends Model
     public function deleteOldBrand()
     {
         $oldLogo = $this->logo;
+        if (null === $oldLogo) {
+            return;
+        }
         $oldLogo = str_replace(asset(''), '', $oldLogo);
         $oldLogo = public_path() . '/' . $oldLogo;
         if (file_exists($oldLogo)) {

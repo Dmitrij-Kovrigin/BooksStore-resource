@@ -2077,10 +2077,14 @@ window.addEventListener('DOMContentLoaded', function () {
     });
   }
 
+  handleDeleteButtons();
+}); // Handlers
+
+var handleDeleteButtons = function handleDeleteButtons() {
   document.querySelectorAll('.delete--button').forEach(function (b) {
     b.addEventListener('click', function () {
-      console.log('click');
       var modal = document.querySelector('#confirm-modal');
+      var body = document.querySelector('body');
       modal.style.display = 'flex';
       modal.style.top = window.scrollY + 'px';
       body.style.overflow = 'hidden';
@@ -2088,7 +2092,17 @@ window.addEventListener('DOMContentLoaded', function () {
       form.setAttribute('action', b.dataset.action);
     });
   });
-}); // Manage photos
+};
+
+var pageSelector = function pageSelector() {
+  document.querySelector('#authors--pages').querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      getAuthorsList();
+    });
+  });
+}; // Manage photos
+
 
 var photoInput = "\n\n    <button type=\"button\" class=\"btn btn-danger mt-2\">-</button>\n    <input type=\"file\" class=\"form-control\" name=\"book_photo[]\">\n\n";
 window.addEventListener('DOMContentLoaded', function () {
@@ -2119,13 +2133,13 @@ window.addEventListener('DOMContentLoaded', function () {
       });
     });
   }
-}); // AUthors List
+}); // Authors List
 
 window.addEventListener('DOMContentLoaded', function () {
+  // Sort Selector
   if (document.querySelector('#sort-select')) {
-    var url = document.querySelector('#authors--list').dataset.url;
     document.querySelector('#sort-select').addEventListener('change', function (e) {
-      document.querySelector('#authors--list').innerHTML = "<div class='loader'></div>";
+      document.querySelector('#authors--list').innerHTML = '<div class="loader"></div>';
       var sort;
 
       switch (e.target.value) {
@@ -2149,18 +2163,47 @@ window.addEventListener('DOMContentLoaded', function () {
           sort = '';
       }
 
-      axios.get(url + sort).then(function (response) {
-        document.querySelector('#authors--list').innerHTML = response.data.html;
+      getAuthorsList(sort);
+    });
+  } // Page Selector
+
+
+  var pageSelector = function pageSelector() {
+    document.querySelector('#authors--pages').querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        console.log(a.getAttribute('href'));
+        getAuthorsList(a.getAttribute('href'));
       });
     });
-  }
+  };
 
-  if (document.querySelector('#authors--list')) {
-    var _url = document.querySelector('#authors--list').dataset.url;
-    axios.get(_url + '?sort=name_desc').then(function (response) {
+  var getAuthorsList = function getAuthorsList() {
+    var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var url = document.querySelector('#authors--list').dataset.url;
+    axios.get(url + query).then(function (response) {
       document.querySelector('#authors--list').innerHTML = response.data.html;
+      pageSelector();
+      handleDeleteButtons();
     });
-  }
+  }; // Handlers
+
+
+  var handleDeleteButtons = function handleDeleteButtons() {
+    document.querySelectorAll('.delete--button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var modal = document.querySelector('#confirm-modal');
+        var body = document.querySelector('body');
+        modal.style.display = 'flex';
+        modal.style.top = window.scrollY + 'px';
+        body.style.overflow = 'hidden';
+        var form = modal.querySelector('form');
+        form.setAttribute('action', b.dataset.action);
+      });
+    });
+  };
+
+  getAuthorsList();
 });
 
 /***/ }),
